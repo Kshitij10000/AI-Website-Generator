@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 Image Encoder</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: #2c2c2c;
+            padding: 20px;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .output-container {
+            background-color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            overflow-x: auto;
+        }
+        pre {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1 class="text-2xl font-bold mb-4">Base64 Image Encoder</h1>
+        <input type="file" id="imageInput" class="block w-full mb-4 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        <button id="startButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Start</button>
+        <div id="imagePreview" class="mb-4"></div>
+    </div>
+    <div class="main-content">
+        <button id="copyButton" class="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mb-4">Copy Code</button>
+        <div id="output" class="output-container"><pre><code id="codeOutput" class="language-html"></code></pre></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-html.min.js"></script>
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const startButton = document.getElementById('startButton');
+        const imagePreview = document.getElementById('imagePreview');
+        const codeOutput = document.getElementById('codeOutput');
+        const copyButton = document.getElementById('copyButton');
+
+        startButton.addEventListener('click', () => {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please upload an image');
+                return;
+            }
+
+            // Display the uploaded image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" class="max-w-full h-auto">`;
+            };
+            reader.readAsDataURL(file);
+
+            // Prepare FormData
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Fetch API call to encode image and get the generated code
+            fetch('/encode-image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    codeOutput.innerText = data.error;
+                } else {
+                    codeOutput.innerText = data.code;
+                    codeOutput.innerHTML = data.code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    Prism.highlightElement(codeOutput); // Highlight the code
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                codeOutput.innerText = 'An error occurred';
+            });
+        });
+
+        copyButton.addEventListener('click', () => {
+            const codeText = codeOutput.innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert('Code copied to clipboard');
+            }).catch(err => {
+                console.error('Error copying text: ', err);
+            });
+        });
+    </script>
+</body>
+</html>
