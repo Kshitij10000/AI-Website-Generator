@@ -1,5 +1,5 @@
 
-HTML_CSS_PROMPT = """
+html_tailwind_prompt = """
 Generate a complete HTML page using Tailwind CSS that matches a given image exactly. The HTML should strictly follow these specifications:
 - Include the Tailwind CSS library via a script tag.
 - Use Google Fonts for typography.

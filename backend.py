@@ -3,8 +3,8 @@ import base64
 import requests
 import os
 from dotenv import load_dotenv
-from tailwind_html import HTML_CSS_PROMPT
-
+from systemprompt.html_tailwind import html_tailwind_prompt
+from systemprompt.react_tailwind import react_tailwind_prompt
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -26,9 +26,18 @@ def index():
 def encode_image_route():
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
-    
+
     image_file = request.files['image']
     base64_image = encode_image(image_file)
+
+    # Get the prompt type from the request form
+    prompt_type = request.form.get('prompt_type')
+    if prompt_type == 'react_tailwind':
+        prompt = react_tailwind_prompt
+    elif prompt_type == 'html_tailwind':
+        prompt = html_tailwind_prompt
+    else:
+        return jsonify({'error': 'Invalid prompt type'}), 400
 
     headers = {
         "Content-Type": "application/json",
@@ -43,7 +52,7 @@ def encode_image_route():
                 "content": [
                     {
                         "type": "text",
-                        "text": HTML_CSS_PROMPT
+                        "text": prompt
                     },
                     {
                         "type": "image_url",
