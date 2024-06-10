@@ -28,7 +28,7 @@
             flex-direction: column;
             overflow: auto;
         }
-        .output-container {
+        .output-container, .display-container {
             position: relative; /* Added for positioning the button */
             background-color: #afaaaa;
             padding: 20px;
@@ -36,6 +36,10 @@
             white-space: pre-wrap;
             overflow-x: auto;
             flex-grow: 1;
+            display: none;
+        }
+        .output-container.active, .display-container.active {
+            display: block;
         }
         .copy-button {
             position: absolute;
@@ -109,6 +113,29 @@
         #inputPrompt {
             display: none; /* Initially hidden */
         }
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden; /* Ensure the scanner stays within the container */
+        }
+        .scanner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(255, 0, 0, 0.5), transparent);
+            animation: scan 3s infinite;
+            pointer-events: none; /* Ensure the scanner doesn't interfere with image interactions */
+        }
+        @keyframes scan {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+        .uploaded-image {
+            max-width: 100%;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -126,7 +153,11 @@
         <div id="imagePreview" class="mb-4"></div>
     </div>
     <div class="main-content">
-        <div id="output" class="output-container">
+        <button id="toggleButton" class="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded mb-4">Show Display</button>
+        <div id="displayContainer" class="display-container">
+            <iframe id="displayFrame" class="w-full h-full border-0"></iframe>
+        </div>
+        <div id="outputContainer" class="output-container">
             <button id="copyButton" class="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded copy-button">Copy Code</button>
             <pre><code id="codeOutput" class="language-html"></code></pre>
         </div>
@@ -141,6 +172,12 @@
         const codeOutput = document.getElementById('codeOutput');
         const copyButton = document.getElementById('copyButton');
         const inputPrompt = document.getElementById('inputPrompt');
+        const toggleButton = document.getElementById('toggleButton');
+        const displayContainer = document.getElementById('displayContainer');
+        const outputContainer = document.getElementById('outputContainer');
+        const displayFrame = document.getElementById('displayFrame');
+
+        let generatedCode = '';
 
         startButton.addEventListener('click', () => {
             const file = imageInput.files[0];
@@ -157,8 +194,16 @@
             // Display the uploaded image
             const reader = new FileReader();
             reader.onload = (e) => {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" class="max-w-full h-auto">`;
-                inputPrompt.style.display = 'block'; // Show input prompt when image is displayed
+                const image = new Image();
+                image.src = e.target.result;
+                image.onload = () => {
+                    imagePreview.innerHTML = `
+                        <div class="scanner-container">
+                            <img src="${e.target.result}" alt="Uploaded Image" class="uploaded-image">
+                            <div class="scanner"></div>
+                        </div>
+                    `;
+                };
             };
             reader.readAsDataURL(file);
 
@@ -177,14 +222,22 @@
                 if (data.error) {
                     codeOutput.innerText = data.error;
                 } else {
-                    codeOutput.innerText = data.code;
-                    codeOutput.innerHTML = data.code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    generatedCode = data.code;
+                    codeOutput.innerText = generatedCode;
+                    codeOutput.innerHTML = generatedCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                     Prism.highlightElement(codeOutput);
+                    inputPrompt.style.display = 'block'; // Show input prompt when code is displayed
                 }
+                // Remove the scanner effect
+                const scanner = document.querySelector('.scanner');
+                if (scanner) scanner.style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
                 codeOutput.innerText = 'An error occurred';
+                // Remove the scanner effect
+                const scanner = document.querySelector('.scanner');
+                if (scanner) scanner.style.display = 'none';
             })
             .finally(() => {
                 // Revert button text to original state
@@ -208,6 +261,22 @@
                 console.error('Error copying text: ', err);
             });
         });
+
+        toggleButton.addEventListener('click', () => {
+            if (outputContainer.classList.contains('active')) {
+                outputContainer.classList.remove('active');
+                displayContainer.classList.add('active');
+                toggleButton.innerText = 'Show Code';
+                displayFrame.srcdoc = generatedCode; // Display the generated code in the iframe
+            } else {
+                displayContainer.classList.remove('active');
+                outputContainer.classList.add('active');
+                toggleButton.innerText = 'Show Display';
+            }
+        });
+
+        // Initially show the output container
+        outputContainer.classList.add('active');
     </script>
 </body>
 </html>
