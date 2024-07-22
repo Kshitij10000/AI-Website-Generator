@@ -17,10 +17,3 @@ The Website Builder is a powerful tool designed to generate websites from user i
 - **Generate and Preview:** Click 'Start' to generate the website code and preview it in an iframe.
 - **Copy Code:** Use the 'Copy Code' button to copy the generated code to your clipboard.
 
-## Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests to us.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
