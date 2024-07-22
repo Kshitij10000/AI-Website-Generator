@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base64 Image Encoder</title>
+    <title>Website Builder</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css" rel="stylesheet">
     <style>
@@ -140,7 +140,10 @@
 </head>
 <body>
     <div class="sidebar">
-        <h1 class="text-2xl font-bold mb-4">Base64 Image Encoder</h1>
+        <h1 class="text-2xl font-bold mb-4">Website Builder</h1>
+        <label for="apiKey" class="block mb-2 text-sm font-medium text-gray-400">API Key:</label>
+        <input type="text" id="apiKey" class="block w-full mb-4 text-sm text-gray-500 bg-gray-700 border border-gray-600 rounded-md focus:border-blue-500 focus:ring-blue-500" placeholder="Enter OpenAI API Key">
+
         <!-- Dropdown for selecting prompt type -->
         <label for="promptType" class="block mb-2 text-sm font-medium text-gray-400">Select Prompt Type:</label>
         <select id="promptType" class="block w-full mb-4 text-sm text-gray-500 bg-gray-700 border border-gray-600 rounded-md focus:border-blue-500 focus:ring-blue-500">
@@ -211,6 +214,7 @@
             const formData = new FormData();
             formData.append('image', file);
             formData.append('prompt_type', promptType.value);
+            formData.append('api_key', document.getElementById('apiKey').value);
 
             // Fetch API call to encode image and get the generated code
             fetch('/encode-image', {
