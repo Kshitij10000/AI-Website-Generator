@@ -1,18 +1,11 @@
 from flask import Flask, request, jsonify, send_from_directory
 import base64
 import requests
-import os
-from dotenv import load_dotenv
 from systemprompt.html_tailwind import html_tailwind_prompt
 from systemprompt.react_tailwind import react_tailwind_prompt
 
-# Load environment variables from a .env file
-load_dotenv()
 
 app = Flask(__name__)
-
-# OpenAI API Key
-api_key = os.getenv("OPENAI_API_KEY")
 
 def encode_image(image_file):
     """Function to encode the uploaded image file to base64."""
@@ -29,8 +22,11 @@ def encode_image_route():
 
     image_file = request.files['image']
     base64_image = encode_image(image_file)
+    api_key = request.form.get('api_key')  # Retrieve API key from the form
 
-    # Get the prompt type from the request form
+    if not api_key:
+        return jsonify({'error': 'API key is missing'}), 400
+
     prompt_type = request.form.get('prompt_type')
     if prompt_type == 'react_tailwind':
         prompt = react_tailwind_prompt
