@@ -13,7 +13,10 @@ The Website Builder is a powerful tool designed to generate websites from user i
 ## How It Works
 
 - **Upload an Image:** Users can upload an image that will be used as a part of the website generation.
+- 
 - **Select Output Format:** Choose between HTML, HTML with Tailwind CSS, or React with Tailwind CSS.
+- 
 - **Generate and Preview:** Click 'Start' to generate the website code and preview it in an iframe.
+- 
 - **Copy Code:** Use the 'Copy Code' button to copy the generated code to your clipboard.
 
